@@ -1,9 +1,9 @@
 import React from 'react'
 
-function LinksDropDown() {
+function LinksDropdown() {
   return (
     <div>LinksDropDown</div>
   )
 }
 
-export default LinksDropDown
+export default LinksDropdown

@@ -1,9 +1,12 @@
-import React from 'react'
+import { Input } from '../ui/input';
 
 function Search() {
   return (
-    <div>Search</div>
-  )
+    <Input
+      type='search'
+      placeholder='find a property...'
+      className='max-w-xs dark:bg-muted '
+    />
+  );
 }
-
-export default Search
+export default Search;

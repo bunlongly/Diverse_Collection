@@ -1,9 +1,7 @@
-import React from 'react';
-import LinksDropDown from './LinksDropDown';
-import DarkMode from './DarkMode';
 import Search from './Search';
+import LinksDropdown from './LinksDropdown';
+import DarkMode from './DarkMode';
 import Logo from './Logo';
-
 function Navbar() {
   return (
     <nav className='border-b'>
@@ -12,7 +10,7 @@ function Navbar() {
         <Search />
         <div className='flex gap-4 items-center '>
           <DarkMode />
-          <LinksDropDown/>
+          <LinksDropdown />
         </div>
       </div>
     </nav>
