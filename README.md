@@ -33,3 +33,15 @@ export const metadata: Metadata = {
   description: 'Feel at home, away from home.',
 };
 ```
+
+
+
+```sh
+npx shadcn@latest add breadcrumb calendar card checkbox dropdown-menu input label popover scroll-area select separator table textarea toast skeleton
+```
+
+```sh
+✔ Which style would you like to use? › New York
+✔ Which color would you like to use as the base color? › Zinc
+? Would you like to use CSS variables for theming?  yes
+```
