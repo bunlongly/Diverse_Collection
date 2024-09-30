@@ -45,3 +45,46 @@ npx shadcn@latest add breadcrumb calendar card checkbox dropdown-menu input labe
 ✔ Which color would you like to use as the base color? › Zinc
 ? Would you like to use CSS variables for theming?  yes
 ```
+
+### Clerk
+
+[Clerk Docs](https://clerk.com/)
+[Clerk + Next.js Setup](https://clerk.com/docs/quickstarts/nextjs)
+
+- create new application
+
+```sh
+npm install @clerk/nextjs
+```
+
+- create .env.local
+
+```bash
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
+```
+
+In Next.js, environment variables that start with NEXT*PUBLIC* are exposed to the browser. This means they can be accessed in your front-end code.
+
+For example, NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY can be used in both server-side and client-side code.
+
+On the other hand, CLERK_SECRET_KEY is a server-side environment variable. It's not exposed to the browser, making it suitable for storing sensitive data like API secrets.
+
+
+- create middleware.ts
+
+```ts
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+
+const isProtectedRoute = createRouteMatcher([
+  '/profile(.*)',
+]);
+
+export default clerkMiddleware((auth, req) => {
+  if (isProtectedRoute(req)) auth().protect();
+});
+
+export const config = {
+  matcher: ['/((?!.*\\..*|_next).*)', '/', '/(api|trpc)(.*)'],
+};
+```
