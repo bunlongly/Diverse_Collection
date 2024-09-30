@@ -88,3 +88,59 @@ export const config = {
   matcher: ['/((?!.*\\..*|_next).*)', '/', '/(api|trpc)(.*)'],
 };
 ```
+
+
+### Toast Component
+
+[Toast](https://ui.shadcn.com/docs/components/toast)
+
+providers.tsx
+
+```tsx
+'use client';
+import { ThemeProvider } from './theme-provider';
+import { Toaster } from '@/components/ui/toaster';
+
+function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <Toaster />
+      <ThemeProvider
+        attribute='class'
+        defaultTheme='system'
+        enableSystem
+        disableTransitionOnChange
+      >
+        {children}
+      </ThemeProvider>
+    </>
+  );
+}
+export default Providers;
+```
+
+### SignOutLink
+
+- redirectUrl
+
+```tsx
+'use client';
+
+import { SignOutButton } from '@clerk/nextjs';
+import { useToast } from '../ui/use-toast';
+
+function SignOutLink() {
+  const { toast } = useToast();
+  const handleLogout = () => {
+    toast({ description: 'You have been signed out.' });
+  };
+  return (
+    <SignOutButton redirectUrl='/'>
+      <button className='w-full text-left' onClick={handleLogout}>
+        Logout
+      </button>
+    </SignOutButton>
+  );
+}
+export default SignOutLink;
+```
