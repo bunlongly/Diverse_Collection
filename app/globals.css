@@ -8,6 +8,23 @@
   }
 }
 
+:root {
+  --main-color: #6698fa;
+  --secondary-color: #3f82ef;
+  --background-color: #ebf4ff;
+}
+
+
+
+.translate-x-0 {
+  transform: translateX(0);
+}
+.-translate-x-full {
+  transform: translateX(-100%);
+}
+.transition-transform {
+  transition: transform 300ms ease-in-out;
+}
 
 @layer base {
   :root {
