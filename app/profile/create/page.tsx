@@ -1,13 +1,9 @@
 import FormInput from '@/components/form/FormInput';
 import { SubmitButton } from '@/components/form/Buttons';
 import FormContainer from '@/components/form/FormContainer';
+import { createProfileAction } from '@/utils/actions';
 
-const createProfileAction = async (prevState: any, formData: FormData) => {
-  'use server';
-  const firstName = formData.get('firstName') as string;
-  if (firstName !== 'shakeAndBake') return { message: 'there was an error...' };
-  return { message: 'Profile Created' };
-};
+
 
 function CreateProfile() {
   return (

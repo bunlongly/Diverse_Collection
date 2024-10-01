@@ -188,3 +188,25 @@ function CreateProfile() {
   );
 }
 export default CreateProfile;
+
+### Zod
+
+Zod is a JavaScript library for building schemas and validating data, providing type safety and error handling.
+
+```sh
+npm install zod
+```
+
+- create utils/schemas.ts
+
+```ts
+import * as z from 'zod';
+import { ZodSchema } from 'zod';
+
+export const profileSchema = z.object({
+  // firstName: z.string().max(5, { message: 'max length is 5' }),
+  firstName: z.string(),
+  lastName: z.string(),
+  username: z.string(),
+});
+```
