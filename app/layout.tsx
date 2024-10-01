@@ -4,7 +4,7 @@ import './globals.css';
 import Navbar from '@/components/sidebar/Navbar';
 import Providers from './providers';
 import { ClerkProvider } from '@clerk/nextjs';
-import Sidebar from '@/components/sidebar/Sidebar';
+// import Sidebar from '@/components/sidebar/Sidebar';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -34,7 +34,7 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <Providers>
-            <Sidebar/>
+            {/* <Sidebar/> */}
             <Navbar />
             <main className='container py-10'>{children}</main>
           </Providers>
