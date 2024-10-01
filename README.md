@@ -210,3 +210,58 @@ export const profileSchema = z.object({
   username: z.string(),
 });
 ```
+
+
+### Prisma
+
+- install prisma vs-code extension
+
+Prisma ORM is a database toolkit that simplifies database access in web applications. It allows developers to interact with databases using a type-safe and auto-generated API, making database operations easier and more secure.
+
+- Prisma server: A standalone infrastructure component sitting on top of your database.
+- Prisma client: An auto-generated library that connects to the Prisma server and lets you read, write and stream data in your database. It is used for data access in your applications.
+
+```sh
+npm install prisma --save-dev
+npm install @prisma/client
+
+```
+
+```sh
+npx prisma init
+```
+
+### Setup Instance
+
+In development, the command next dev clears Node.js cache on run. This in turn initializes a new PrismaClient instance each time due to hot reloading that creates a connection to the database. This can quickly exhaust the database connections as each PrismaClient instance holds its own connection pool.
+
+(Prisma Instance)[https://www.prisma.io/docs/guides/other/troubleshooting-orm/help-articles/nextjs-prisma-client-dev-practices#solution]
+
+
+
+```
+
+- npx prisma migrate dev --name init
+- npx prisma db push
+
+npx prisma migrate dev --name init creates a new migration for your database schema
+changes and applies it, while npx prisma db push directly updates the database schema without creating a migration. In the context of databases, a migration is set of operations, that modify the database schema, helping it evolve over time while preserving existing data.
+
+```bash
+
+npx prisma db push
+```
+
+```bash
+npx prisma studio
+
+
+Use prisma db push for quick schema prototyping in development.
+Use prisma generate to keep your Prisma client up to date with your schema, both in development and production.
+Use prisma migrate for managing database changes in production safely through migrations.
+
+```
+
+## Optional - Prisma Crud
+
+[Prisma Docs](https://www.prisma.io/docs/concepts/components/prisma-client/crud)
