@@ -7,9 +7,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model TestProfile {
-  id  String @id @default(uuid()) @map("_id")
-  name String
 
-  @@map("test_profiles")
+model Profile {
+  id           String    @id @default(uuid()) @map("_id")
+  clerkId      String     @unique
+  firstName    String
+  lastName     String
+  username     String
+  email        String
+  profileImage String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
 }
