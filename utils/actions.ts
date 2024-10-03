@@ -2,6 +2,7 @@
 
 import { profileSchema } from './schemas';
 import db from './db';
+import { upload } from './upload';
 import { auth, clerkClient, currentUser } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
@@ -110,11 +111,27 @@ export const updateProfileImageAction = async (
 ): Promise<{ message: string }> => {
   const user = await getAuthUser();
   try {
-    const image = formData.get('image') as File;
-    const validatedFields = validateWithZodSchema(imageSchema, { image });
+    // Logging to see what formData contains
+    console.log(Array.from(formData.entries()));
+
+    const imageFile = formData.get('image') as File | null;
+
+    if (!imageFile) {
+      throw new Error('No image file provided or the file is null.');
+    }
+
+    const uploadFormData = new FormData();
+    uploadFormData.append('image', imageFile);
+
+    const image = await upload(user.imageUrl ?? null, uploadFormData);
+    await db.profile.update({
+      where: { clerkId: user.id },
+      data: { profileImage: image || '' }
+    });
 
     return { message: 'Profile image updated successfully' };
   } catch (error) {
+    console.error('Failed in updateProfileImageAction:', error);
     return renderError(error);
   }
 };
