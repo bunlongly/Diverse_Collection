@@ -850,3 +850,19 @@ export const updateProfileImageAction = async (
   }
 };
 ```
+
+
+```ts
+
+Background Colors:
+
+    dark:bg-card: Applied to the main container (div) of the component. It changes the background color in dark mode to whatever color is assigned to --card in your Tailwind configuration for dark themes.
+
+Text Colors:
+
+    dark:text-foreground: Used for text elements like labels and informative text. This class will change the text color to a lighter shade suitable for dark backgrounds, typically white or light gray, depending on your Tailwind setup.
+
+Border Colors:
+
+    dark:border-gray-600: Applied to borders in your components, such as the image container and the input file border. It ensures the borders are visible against the darker background by providing a contrast that matches the dark theme.
+````

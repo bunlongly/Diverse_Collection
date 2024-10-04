@@ -3,10 +3,10 @@
 import { profileSchema } from './schemas';
 import db from './db';
 import { upload } from './upload';
-import { auth, clerkClient, currentUser } from '@clerk/nextjs/server';
+import { clerkClient, currentUser } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { validateWithZodSchema, imageSchema } from './schemas';
+import { validateWithZodSchema} from './schemas';
 
 const getAuthUser = async () => {
   const user = await currentUser();

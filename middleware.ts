@@ -2,8 +2,7 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
 const isProtectedRoute = createRouteMatcher([
   '/profile(.*)',
-  '/profile(.*)',
-  '/product(.*)',
+  '/products(.*)',
   '/categories(.*)',
   '/invoice(.*)',
   '/income(.*)',
@@ -11,7 +10,13 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware((auth, req) => {
-  if (isProtectedRoute(req)) auth().protect();
+  console.log(`Accessing: ${req.url}`); // Make sure you're logging the correct property
+  if (isProtectedRoute(req)) {
+    console.log('Protecting route:', req.url);
+    auth().protect();
+  } else {
+    console.log('No protection needed for:', req.url);
+  }
 });
 
 export const config = {
