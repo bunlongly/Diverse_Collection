@@ -4,7 +4,7 @@ function Search() {
   return (
     <Input
       type='search'
-      placeholder='find a property...'
+      placeholder='find a product...'
       className='max-w-xs dark:bg-muted '
     />
   );

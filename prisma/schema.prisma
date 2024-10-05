@@ -7,16 +7,45 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model Profile {
   id           String    @id @default(uuid()) @map("_id")
-  clerkId      String     @unique
+  clerkId      String    @unique
   firstName    String
   lastName     String
   username     String
   email        String
   profileImage String
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  // Consider adding products back-reference if needed
+  products     Product[]
+}
 
+model Product {
+  id              String            @id @default(auto()) @map("_id") @db.ObjectId
+  brand           String
+  name            String
+  category        String
+  description     String?
+  condition       String?
+  originalPrice   Float?
+  sellingPrice    Float
+  inventoryStatus String
+  color           String[]
+  imageUrls       String[]
+  details         Json?             // Store complex or varied information about the product
+  releaseDate     DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  profileId       String            @db.ObjectId
+  profile         Profile           @relation(fields: [profileId], references: [id])
+  attributes      ProductAttribute[]
+}
+
+model ProductAttribute {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String   @db.ObjectId
+  key       String
+  value     String   // Consider adding different type fields if necessary
 }
