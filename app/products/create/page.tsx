@@ -13,34 +13,37 @@ const CreateProduct: React.FC = () => {
     brand: 'NIKE',
     genderCategory: 'UNISEX',
     category: 'Shoes',
-    description: '',
-    price: '', // Start as an empty string
+    description:
+      'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
+    price: null, // Initialize as null
     inventoryStatus: 'In Stock',
-    originalPrice: '', // Start as an empty string
-    sellingPrice: '', // Start as an empty string
-    countInStock: '', // Start as an empty string
+    originalPrice: null, // Initialize as null
+    sellingPrice: null, // Initialize as null
+    countInStock: null, // Initialize as null
     sizes: [],
     colors: [],
     imageUrls: [],
-    releaseDate: '',
+    releaseDate: null,
     color: []
   });
   const [selectedProductType, setSelectedProductType] =
     useState<ProductCategory>('Shoes');
 
-  const SpecificProductForm = React.useMemo(() => {
-    return dynamic<IProductFormProps>(
-      () =>
-        import(`@/components/form/${selectedProductType}Form`).catch(err => {
-          console.error(
-            `Failed to load component for type ${selectedProductType}:`,
-            err
-          );
-          throw err;
-        }),
-      { loading: () => <LoadingSpinner />, ssr: false }
-    );
-  }, [selectedProductType]); // Dependency array ensures import only changes if selectedProductType changes
+  const SpecificProductForm = React.useMemo(
+    () =>
+      dynamic<IProductFormProps>(
+        () =>
+          import(`@/components/form/${selectedProductType}Form`).catch(err => {
+            console.error(
+              `Failed to load component for type ${selectedProductType}:`,
+              err
+            );
+            throw err;
+          }),
+        { loading: () => <LoadingSpinner />, ssr: false }
+      ),
+    [selectedProductType]
+  );
 
   const handleProductTypeChange = (newCategory: ProductCategory) => {
     setProduct({ ...product, category: newCategory });
@@ -52,11 +55,12 @@ const CreateProduct: React.FC = () => {
     const formData = new FormData();
     Object.keys(product).forEach(key => {
       const value = product[key as keyof Product];
-      if (Array.isArray(value)) {
-        value.forEach(item => formData.append(key, item));
-      } else if (value !== null && value !== undefined) {
-        // Check to ensure that only valid values are appended
-        formData.append(key, value.toString());
+      if (value !== null) {
+        if (Array.isArray(value)) {
+          value.forEach(item => formData.append(key, item));
+        } else {
+          formData.append(key, value.toString());
+        }
       }
     });
 

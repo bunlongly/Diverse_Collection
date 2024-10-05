@@ -27,38 +27,40 @@ export function validateWithZodSchema<T>(
   return result.data;
 }
 
-
 export const imageSchema = z.object({
-    image: validateFile()
-  });
-  
-  function validateFile() {
-    const maxUploadSize = 1024 * 1024;
-    const acceptedFileTypes = ['image/'];
-    return z
-      .instanceof(File)
-      .refine(file => {
-        return !file || file.size <= maxUploadSize;
-      }, `File size must be less than 1 MB`)
-      .refine(file => {
-        return (
-          !file || acceptedFileTypes.some(type => file.type.startsWith(type))
-        );
-      }, 'File must be an image');
-  }
+  image: validateFile()
+});
 
+function validateFile() {
+  const maxUploadSize = 1024 * 1024;
+  const acceptedFileTypes = ['image/'];
+  return z
+    .instanceof(File)
+    .refine(file => {
+      return !file || file.size <= maxUploadSize;
+    }, `File size must be less than 1 MB`)
+    .refine(file => {
+      return (
+        !file || acceptedFileTypes.some(type => file.type.startsWith(type))
+      );
+    }, 'File must be an image');
+}
 
-
-  export const productSchema = z.object({
-    name: z.string(),
-    brand: z.string(),
-    category: z.string(),
-    description: z.string().optional(),
-    originalPrice: z.number(),
-    sellingPrice: z.number(),
-    inventoryStatus: z.string(),
-    color: z.array(z.string()),
-    sizes: z.array(z.string()).optional(),
-    imageUrls: z.array(z.string()).optional(), // If you handle image URLs separately
-  });
-  
+export const productSchema = z.object({
+  name: z.string().min(1, { message: 'Name is required' }),
+  brand: z.string().min(1, { message: 'Brand is required' }),
+  category: z.string().min(1, { message: 'Category is required' }),
+  description: z.string().optional(),
+  originalPrice: z
+    .number()
+    .nonnegative({ message: 'Original price must be a non-negative number' }),
+  sellingPrice: z
+    .number()
+    .nonnegative({ message: 'Selling price must be a non-negative number' }),
+  inventoryStatus: z
+    .string()
+    .min(1, { message: 'Inventory status is required' }),
+  color: z.array(z.string()), // Assuming colors are always required; if not, make optional
+  sizes: z.array(z.string()).optional(),
+  imageUrls: z.array(z.string()).optional()
+});

@@ -7,6 +7,7 @@ import { clerkClient, currentUser } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { validateWithZodSchema } from './schemas';
+import { Product } from './types';
 
 const getAuthUser = async () => {
   const user = await currentUser();
@@ -136,33 +137,78 @@ export const updateProfileImageAction = async (
   }
 };
 
-// Create a new product
-export const createProductAction = async (formData: FormData): Promise<{ message: string, product?: any }> => {
+
+
+
+
+
+// Helper function to process FormData and convert it into a structured object
+function processData(formData: FormData): Product {
+    const rawData: any = {};  // Use `any` temporarily to avoid TypeScript errors during assembly
+  
+    formData.forEach((value, key) => {
+      if (!(value instanceof File)) {
+        // Convert string to arrays if the key expects an array
+        if (['colors', 'sizes', 'imageUrls'].includes(key)) {
+          rawData[key] = typeof value === 'string' ? value.split(',').map(item => item.trim()) : [];
+        } else if (['price', 'originalPrice', 'sellingPrice', 'countInStock'].includes(key)) {
+          // Convert string to number if the key expects a number, with fallback to null if empty
+          rawData[key] = value ? parseFloat(value) : null;
+        } else {
+          // Directly assign the value for other keys
+          rawData[key] = value;
+        }
+      }
+    });
+  
+    // Ensure the return object strictly conforms to the Product type
+    return {
+      name: rawData.name || '',
+      brand: rawData.brand || '',
+      genderCategory: rawData.genderCategory || 'UNISEX',
+      category: rawData.category || 'Shoes',
+      description: rawData.description || '',
+      price: rawData.price || null,
+      inventoryStatus: rawData.inventoryStatus || 'In Stock',
+      originalPrice: rawData.originalPrice || null,
+      sellingPrice: rawData.sellingPrice || null,
+      countInStock: rawData.countInStock || null,
+      sizes: rawData.sizes || [],
+      colors: rawData.colors || [],
+      imageUrls: rawData.imageUrls || [],
+      releaseDate: rawData.releaseDate || null,
+      color: rawData.color || []
+    };
+  }
+  
+  // Helper function to handle image uploads
+  async function handleImageUpload(formData: FormData): Promise<string> {
+    const imageFile = formData.get('image');
+    if (imageFile instanceof File) {
+      const newFormData = new FormData();
+      newFormData.append('image', imageFile);
+      const uploadResult = await upload(null, newFormData);
+      return uploadResult || ''; // Return the URL or an empty string if the upload fails
+    }
+    return '';
+  }
+  
+  // Main function to create a new product
+  export const createProductAction = async (
+    formData: FormData
+  ): Promise<{ message: string; product?: any }> => {
     const user = await currentUser();
-    
+  
     if (!user) {
       throw new Error('You must be logged in to access this route');
     }
   
     try {
-      const rawData = Object.fromEntries(formData);
-      const validatedFields = validateWithZodSchema(productSchema, rawData);
-      const imageFile = formData.get('image') as File | null;
+      const preparedData = processData(formData);
+      const validatedFields = validateWithZodSchema(productSchema, preparedData);
+      const imagePath = await handleImageUpload(formData);
   
-      let imagePath = '';
-  
-      if (imageFile) {
-        const newFormData = new FormData();
-        newFormData.append('image', imageFile);
-  
-        const uploadResult = await upload(null, newFormData);
-        if (uploadResult) {
-          imagePath = uploadResult;
-        } else {
-          throw new Error('Failed to upload image');
-        }
-      }
-  
+      // Create new product in the database
       const newProduct = await db.product.create({
         data: {
           ...validatedFields,
@@ -171,13 +217,15 @@ export const createProductAction = async (formData: FormData): Promise<{ message
         }
       });
   
-      return { 
+      return {
         message: 'Product created successfully',
-        product: newProduct  // Optionally return the newly created product details
+        product: newProduct
       };
     } catch (error) {
       console.error('Failed in createProductAction:', error);
-      return { message: error instanceof Error ? error.message : 'Failed to create product' };
+      return {
+        message: error instanceof Error ? error.message : 'Failed to create product'
+      };
     }
   };
   

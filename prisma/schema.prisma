@@ -33,7 +33,7 @@ model Product {
   inventoryStatus String
   color           String[]
   imageUrls       String[]
-  details         Json?             // Store complex or varied information about the product
+  details         Json?             // For complex or varied product information
   releaseDate     DateTime?
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
@@ -47,5 +47,5 @@ model ProductAttribute {
   product   Product  @relation(fields: [productId], references: [id])
   productId String   @db.ObjectId
   key       String
-  value     String   // Consider adding different type fields if necessary
+  value     String   // Handling as string; consider other types as needed
 }

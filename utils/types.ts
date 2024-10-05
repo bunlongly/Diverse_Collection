@@ -17,15 +17,15 @@ export interface Product {
   genderCategory: 'Men' | 'Women' | 'UNISEX';
   category: ProductCategory;
   description: string;
-  price: number | '';
+  price: number | null;
   inventoryStatus: 'In Stock' | 'Out of Stock' | 'Pre-order';
   sizes: string[];
   colors: string[];
   imageUrls: string[];
-  originalPrice: number | '';
-  sellingPrice: number | '';
-  countInStock: number | '';
-  releaseDate: number | '';
+  originalPrice: number | null;
+  sellingPrice: number | null;
+  countInStock: number | null;
+  releaseDate: number | null;
   color: string[];
 }
 
