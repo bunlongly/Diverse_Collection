@@ -1,12 +1,12 @@
 'use server';
 
-import { profileSchema } from './schemas';
+import { profileSchema, productSchema } from './schemas';
 import db from './db';
 import { upload } from './upload';
 import { clerkClient, currentUser } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { validateWithZodSchema} from './schemas';
+import { validateWithZodSchema } from './schemas';
 
 const getAuthUser = async () => {
   const user = await currentUser();
@@ -135,3 +135,49 @@ export const updateProfileImageAction = async (
     return renderError(error);
   }
 };
+
+// Create a new product
+export const createProductAction = async (formData: FormData): Promise<{ message: string, product?: any }> => {
+    const user = await currentUser();
+    
+    if (!user) {
+      throw new Error('You must be logged in to access this route');
+    }
+  
+    try {
+      const rawData = Object.fromEntries(formData);
+      const validatedFields = validateWithZodSchema(productSchema, rawData);
+      const imageFile = formData.get('image') as File | null;
+  
+      let imagePath = '';
+  
+      if (imageFile) {
+        const newFormData = new FormData();
+        newFormData.append('image', imageFile);
+  
+        const uploadResult = await upload(null, newFormData);
+        if (uploadResult) {
+          imagePath = uploadResult;
+        } else {
+          throw new Error('Failed to upload image');
+        }
+      }
+  
+      const newProduct = await db.product.create({
+        data: {
+          ...validatedFields,
+          imageUrls: imagePath ? [imagePath] : [],
+          profileId: user.id
+        }
+      });
+  
+      return { 
+        message: 'Product created successfully',
+        product: newProduct  // Optionally return the newly created product details
+      };
+    } catch (error) {
+      console.error('Failed in createProductAction:', error);
+      return { message: error instanceof Error ? error.message : 'Failed to create product' };
+    }
+  };
+  

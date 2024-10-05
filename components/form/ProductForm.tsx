@@ -139,7 +139,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, setProduct }) => {
               id='price'
               name='price'
               type='number'
-              value={product.price || 0}
+              value={product.price || ''}
               onChange={handleInputChange}
               className='mt-1 block w-full p-2 border-gray-300 dark:border-input rounded shadow-md dark:bg-card dark:text-foreground'
             />
@@ -152,7 +152,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, setProduct }) => {
               id='originalPrice'
               name='originalPrice'
               type='number'
-              value={product.originalPrice || 0}
+              value={product.originalPrice || ''}
               onChange={handleInputChange}
               className='mt-1 block w-full p-2 border-gray-300 dark:border-input rounded shadow-md dark:bg-card dark:text-foreground'
             />
@@ -165,7 +165,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, setProduct }) => {
               id='sellingPrice'
               name='sellingPrice'
               type='number'
-              value={product.sellingPrice || 0}
+              value={product.sellingPrice || ''}
               onChange={handleInputChange}
               className='mt-1 block w-full p-2 border-gray-300 dark:border-input rounded shadow-md dark:bg-card dark:text-foreground'
             />
@@ -178,7 +178,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, setProduct }) => {
               id='countInStock'
               name='countInStock'
               type='number'
-              value={product.countInStock || 0}
+              value={product.countInStock || ''}
               onChange={handleInputChange}
               className='mt-1 block w-full p-2 border-gray-300 dark:border-input rounded shadow-md dark:bg-card dark:text-foreground'
             />

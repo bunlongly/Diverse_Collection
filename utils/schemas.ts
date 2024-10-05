@@ -46,3 +46,19 @@ export const imageSchema = z.object({
         );
       }, 'File must be an image');
   }
+
+
+
+  export const productSchema = z.object({
+    name: z.string(),
+    brand: z.string(),
+    category: z.string(),
+    description: z.string().optional(),
+    originalPrice: z.number(),
+    sellingPrice: z.number(),
+    inventoryStatus: z.string(),
+    color: z.array(z.string()),
+    sizes: z.array(z.string()).optional(),
+    imageUrls: z.array(z.string()).optional(), // If you handle image URLs separately
+  });
+  

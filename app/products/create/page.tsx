@@ -4,82 +4,91 @@ import dynamic from 'next/dynamic';
 import { Product, ProductCategory, IProductFormProps } from '@/utils/types';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ProductDefault from '@/components/form/ProductForm';
-
-const initialProductState: Product = {
-  name: 'AF1',
-  brand: '',
-  genderCategory: 'UNISEX',
-  category: 'Shoes',
-  description: '',
-  price: 0,
-  inventoryStatus: 'In Stock',
-  originalPrice: 0,
-  sellingPrice: 0,
-  countInStock: 0,
-  sizes: [],
-  colors: [],
-  imageUrls: [],
-  releaseDate: 0,
-  color: []
-};
+import { SubmitButton } from '@/components/form/Buttons';
+import { createProductAction } from '@/utils/actions';
 
 const CreateProduct: React.FC = () => {
-  const [product, setProduct] = useState<Product>(initialProductState);
+  const [product, setProduct] = useState<Product>({
+    name: 'AF1',
+    brand: 'NIKE',
+    genderCategory: 'UNISEX',
+    category: 'Shoes',
+    description: '',
+    price: '', // Start as an empty string
+    inventoryStatus: 'In Stock',
+    originalPrice: '', // Start as an empty string
+    sellingPrice: '', // Start as an empty string
+    countInStock: '', // Start as an empty string
+    sizes: [],
+    colors: [],
+    imageUrls: [],
+    releaseDate: '',
+    color: []
+  });
   const [selectedProductType, setSelectedProductType] =
     useState<ProductCategory>('Shoes');
 
-  const categories = [
-    'Shoes',
-    'Bags',
-    'Perfumes',
-    'Belts',
-    'Clothes',
-    'Snacks'
-  ];
-
-  // Using dynamic to load the specific form with type assertion
-  const SpecificProductForm = dynamic<IProductFormProps>(
-    () =>
-      import(`@/components/form/${selectedProductType}Form`).catch(err => {
-        console.error(
-          `Failed to load component for type ${selectedProductType} at path: '@/components/form/${selectedProductType}Form'`
-        );
-        console.error(err);
-        throw err; // Rethrow to avoid silent failure if no fallback
-      }),
-    {
-      loading: () => <LoadingSpinner />,
-      ssr: false
-    }
-  );
+  const SpecificProductForm = React.useMemo(() => {
+    return dynamic<IProductFormProps>(
+      () =>
+        import(`@/components/form/${selectedProductType}Form`).catch(err => {
+          console.error(
+            `Failed to load component for type ${selectedProductType}:`,
+            err
+          );
+          throw err;
+        }),
+      { loading: () => <LoadingSpinner />, ssr: false }
+    );
+  }, [selectedProductType]); // Dependency array ensures import only changes if selectedProductType changes
 
   const handleProductTypeChange = (newCategory: ProductCategory) => {
-    setProduct({ ...initialProductState, category: newCategory });
+    setProduct({ ...product, category: newCategory });
     setSelectedProductType(newCategory);
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    console.log('Submitting product:', product);
+    const formData = new FormData();
+    Object.keys(product).forEach(key => {
+      const value = product[key as keyof Product];
+      if (Array.isArray(value)) {
+        value.forEach(item => formData.append(key, item));
+      } else if (value !== null && value !== undefined) {
+        // Check to ensure that only valid values are appended
+        formData.append(key, value.toString());
+      }
+    });
+
+    try {
+      const response = await createProductAction(formData);
+      alert('Product created successfully: ' + response.message);
+    } catch (error) {
+      alert('Failed to create product: ' + (error as Error).message);
+      console.error('Product creation error:', error);
+    }
   };
 
   return (
     <div className='p-10'>
       <h1 className='text-2xl font-bold mb-8'>Create Product</h1>
       <div className='mb-8 flex space-x-2'>
-        {categories.map(category => (
-          <button
-            key={category}
-            onClick={() => handleProductTypeChange(category as ProductCategory)}
-            className={`px-4 py-2 rounded-md text-white ${
-              selectedProductType === category ? 'bg-blue-500' : 'bg-gray-300'
-            }`}
-          >
-            {category}
-          </button>
-        ))}
+        {['Shoes', 'Bags', 'Perfumes', 'Belts', 'Clothes', 'Snacks'].map(
+          category => (
+            <button
+              key={category}
+              onClick={() =>
+                handleProductTypeChange(category as ProductCategory)
+              }
+              className={`px-4 py-2 rounded-md text-white ${
+                selectedProductType === category ? 'bg-blue-500' : 'bg-gray-300'
+              }`}
+            >
+              {category}
+            </button>
+          )
+        )}
       </div>
-
       <form onSubmit={handleSubmit}>
         <Suspense
           fallback={
@@ -91,12 +100,10 @@ const CreateProduct: React.FC = () => {
           <ProductDefault product={product} setProduct={setProduct} />
           <SpecificProductForm product={product} setProduct={setProduct} />
         </Suspense>
-        <button
-          type='submit'
+        <SubmitButton
+          text='Create Product'
           className='mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
-        >
-          Create Product
-        </button>
+        />
       </form>
     </div>
   );
