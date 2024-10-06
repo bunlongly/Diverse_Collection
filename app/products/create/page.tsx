@@ -23,6 +23,7 @@ const CreateProduct: React.FC = () => {
     sizes: [],
     colors: [],
     imageUrls: [],
+    condition: 'New',
     releaseDate: null,
     color: []
   });

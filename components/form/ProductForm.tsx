@@ -14,6 +14,7 @@ import ProductImage from './ProductImage';
 import ColorForm from './ColorForm';
 import SizeForm from './SizeForm';
 
+
 interface ProductFormProps {
   product: Product;
   setProduct: (product: Product) => void;
@@ -41,6 +42,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, setProduct }) => {
   const handleColorsChange = (colors: string[]) => {
     setProduct({ ...product, color: colors });
   };
+
 
   return (
     <div className='flex p-6 bg-white dark:bg-card border border-gray-200 dark:border-input shadow-lg rounded-lg space-x-4'>
@@ -73,6 +75,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, setProduct }) => {
               className='mt-1 block w-full p-2 border-gray-300 dark:border-input rounded shadow-md dark:bg-card dark:text-foreground'
             />
           </div>
+
           <div>
             <Label htmlFor='genderCategory' className='dark:text-foreground'>
               Gender Category
@@ -95,6 +98,31 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, setProduct }) => {
               </SelectContent>
             </Select>
           </div>
+
+          <div>
+            <Label htmlFor='condition' className='dark:text-foreground'>
+              Condition
+            </Label>
+            <Select
+              value={product.condition}
+              onValueChange={value =>
+                handleSelectChange('condition', value)
+              }
+            >
+              <SelectTrigger className='border-gray-300 dark:border-input rounded shadow-md dark:bg-card dark:text-foreground'>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {['New', 'Used', 'Refurbished'].map(option => (
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+
           <div>
             <Label htmlFor='releaseDate' className='dark:text-foreground'>
               Release Date
@@ -108,6 +136,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, setProduct }) => {
               className='mt-1 block w-full p-2 border-gray-300 dark:border-input rounded shadow-md dark:bg-card dark:text-foreground'
             />
           </div>
+
+          
+
           <div className='col-span-2'>
             <Label htmlFor='description' className='dark:text-foreground'>
               Description

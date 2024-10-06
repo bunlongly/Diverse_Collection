@@ -173,6 +173,7 @@ function processData(formData: FormData): Product {
     brand: rawData.brand || '',
     genderCategory: rawData.genderCategory || 'UNISEX',
     category: rawData.category || 'Shoes',
+    condition: rawData.condition || 'New',
     description: rawData.description || '',
     price: rawData.price || null,
     inventoryStatus: rawData.inventoryStatus || 'In Stock',
