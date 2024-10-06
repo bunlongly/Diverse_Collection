@@ -138,94 +138,101 @@ export const updateProfileImageAction = async (
 };
 
 
-
-
-
-
 // Helper function to process FormData and convert it into a structured object
 function processData(formData: FormData): Product {
-    const rawData: any = {};  // Use `any` temporarily to avoid TypeScript errors during assembly
-  
-    formData.forEach((value, key) => {
-      if (!(value instanceof File)) {
-        // Convert string to arrays if the key expects an array
-        if (['colors', 'sizes', 'imageUrls'].includes(key)) {
-          rawData[key] = typeof value === 'string' ? value.split(',').map(item => item.trim()) : [];
-        } else if (['price', 'originalPrice', 'sellingPrice', 'countInStock'].includes(key)) {
-          // Convert string to number if the key expects a number, with fallback to null if empty
-          rawData[key] = value ? parseFloat(value) : null;
-        } else {
-          // Directly assign the value for other keys
-          rawData[key] = value;
-        }
+  const rawData: any = {}; // Use `any` temporarily to avoid TypeScript errors during assembly
+
+  formData.forEach((value, key) => {
+    console.log(`Key: ${key}, Value: ${value}`); // Log each key-value pair received
+
+    if (!(value instanceof File)) {
+      if (['colors', 'sizes', 'imageUrls'].includes(key)) {
+        // Ensuring even single string values are treated as arrays
+        rawData[key] =
+          typeof value === 'string'
+            ? value.split(',').map(item => item.trim())
+            : [value];
+        console.log(`Processed array for ${key}:`, rawData[key]); // Log the processed array
+      } else if (
+        ['price', 'originalPrice', 'sellingPrice', 'countInStock'].includes(key)
+      ) {
+        // Convert string to number with fallback to null if conversion fails or if the string is empty
+        rawData[key] = value ? parseFloat(value) : null;
+        console.log(`Processed number for ${key}:`, rawData[key]); // Log the processed number
+      } else {
+        rawData[key] = value;
+      }
+    }
+  });
+
+  console.log('Final processed data:', rawData); // Log the fully processed data object
+  return {
+    name: rawData.name || '',
+    brand: rawData.brand || '',
+    genderCategory: rawData.genderCategory || 'UNISEX',
+    category: rawData.category || 'Shoes',
+    description: rawData.description || '',
+    price: rawData.price || null,
+    inventoryStatus: rawData.inventoryStatus || 'In Stock',
+    originalPrice: rawData.originalPrice || null,
+    sellingPrice: rawData.sellingPrice || null,
+    countInStock: rawData.countInStock || null,
+    sizes: rawData.sizes || [],
+    colors: rawData.colors || [],
+    imageUrls: rawData.imageUrls || [],
+    releaseDate: rawData.releaseDate || null,
+    color: rawData.color || []
+  };
+}
+
+// Helper function to handle image uploads
+async function handleImageUpload(formData: FormData): Promise<string> {
+  const imageFile = formData.get('image');
+  if (imageFile instanceof File) {
+    const newFormData = new FormData();
+    newFormData.append('image', imageFile);
+    const uploadResult = await upload(null, newFormData);
+    return uploadResult || ''; // Return the URL or an empty string if the upload fails
+  }
+  return '';
+}
+
+// Main function to create a new product
+export const createProductAction = async (
+  formData: FormData
+): Promise<{ message: string; product?: any }> => {
+  const user = await currentUser();
+
+  if (!user) {
+    throw new Error('You must be logged in to access this route');
+  }
+
+  try {
+    const preparedData = processData(formData);
+    console.log('Data to be validated:', preparedData); // Log the data right before validation
+    const validatedFields = validateWithZodSchema(productSchema, preparedData);
+    console.log('Validated fields:', validatedFields); // Log validated data to ensure correctness
+
+    const imagePath = await handleImageUpload(formData);
+
+    // Create new product in the database
+    const newProduct = await db.product.create({
+      data: {
+        ...validatedFields,
+        imageUrls: imagePath ? [imagePath] : [],
+        profileId: user.id
       }
     });
-  
-    // Ensure the return object strictly conforms to the Product type
+
     return {
-      name: rawData.name || '',
-      brand: rawData.brand || '',
-      genderCategory: rawData.genderCategory || 'UNISEX',
-      category: rawData.category || 'Shoes',
-      description: rawData.description || '',
-      price: rawData.price || null,
-      inventoryStatus: rawData.inventoryStatus || 'In Stock',
-      originalPrice: rawData.originalPrice || null,
-      sellingPrice: rawData.sellingPrice || null,
-      countInStock: rawData.countInStock || null,
-      sizes: rawData.sizes || [],
-      colors: rawData.colors || [],
-      imageUrls: rawData.imageUrls || [],
-      releaseDate: rawData.releaseDate || null,
-      color: rawData.color || []
+      message: 'Product created successfully',
+      product: newProduct
+    };
+  } catch (error) {
+    console.error('Failed in createProductAction:', error);
+    return {
+      message:
+        error instanceof Error ? error.message : 'Failed to create product'
     };
   }
-  
-  // Helper function to handle image uploads
-  async function handleImageUpload(formData: FormData): Promise<string> {
-    const imageFile = formData.get('image');
-    if (imageFile instanceof File) {
-      const newFormData = new FormData();
-      newFormData.append('image', imageFile);
-      const uploadResult = await upload(null, newFormData);
-      return uploadResult || ''; // Return the URL or an empty string if the upload fails
-    }
-    return '';
-  }
-  
-  // Main function to create a new product
-  export const createProductAction = async (
-    formData: FormData
-  ): Promise<{ message: string; product?: any }> => {
-    const user = await currentUser();
-  
-    if (!user) {
-      throw new Error('You must be logged in to access this route');
-    }
-  
-    try {
-      const preparedData = processData(formData);
-      const validatedFields = validateWithZodSchema(productSchema, preparedData);
-      const imagePath = await handleImageUpload(formData);
-  
-      // Create new product in the database
-      const newProduct = await db.product.create({
-        data: {
-          ...validatedFields,
-          imageUrls: imagePath ? [imagePath] : [],
-          profileId: user.id
-        }
-      });
-  
-      return {
-        message: 'Product created successfully',
-        product: newProduct
-      };
-    } catch (error) {
-      console.error('Failed in createProductAction:', error);
-      return {
-        message: error instanceof Error ? error.message : 'Failed to create product'
-      };
-    }
-  };
-  
+};
