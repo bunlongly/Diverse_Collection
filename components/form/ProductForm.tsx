@@ -123,7 +123,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, setProduct }) => {
           </div>
 
 
-          <div>
+          <div className='col-span-2'>
             <Label htmlFor='releaseDate' className='dark:text-foreground'>
               Release Date
             </Label>
