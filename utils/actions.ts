@@ -14,6 +14,7 @@ const getAuthUser = async () => {
   if (!user) {
     throw new Error('You must be logged in to access this route');
   }
+  console.log('Current user ID:', user.id);
   if (!user.privateMetadata.hasProfile) redirect('/profile/create');
   return user;
 };
@@ -137,21 +138,22 @@ export const updateProfileImageAction = async (
   }
 };
 
-
-// Helper function to process FormData and convert it into a structured object
 function processData(formData: FormData): Product {
-  const rawData: any = {}; // Use `any` temporarily to avoid TypeScript errors during assembly
+  const rawData: any = {};
 
   formData.forEach((value, key) => {
     console.log(`Key: ${key}, Value: ${value}`); // Log each key-value pair received
 
     if (!(value instanceof File)) {
       if (['colors', 'sizes', 'imageUrls'].includes(key)) {
-        // Ensuring even single string values are treated as arrays
-        rawData[key] =
-          typeof value === 'string'
-            ? value.split(',').map(item => item.trim())
-            : [value];
+        // Check if rawData[key] already exists, make it an array if not
+        if (!rawData[key]) {
+          rawData[key] = [];
+        }
+        // Assuming values for arrays come as single strings that need to be split
+        rawData[key] = value.includes(',')
+          ? value.split(',').map(item => item.trim())
+          : [value.trim()];
         console.log(`Processed array for ${key}:`, rawData[key]); // Log the processed array
       } else if (
         ['price', 'originalPrice', 'sellingPrice', 'countInStock'].includes(key)
@@ -181,7 +183,7 @@ function processData(formData: FormData): Product {
     colors: rawData.colors || [],
     imageUrls: rawData.imageUrls || [],
     releaseDate: rawData.releaseDate || null,
-    color: rawData.color || []
+    color: rawData.colors || []
   };
 }
 
@@ -206,6 +208,8 @@ export const createProductAction = async (
   if (!user) {
     throw new Error('You must be logged in to access this route');
   }
+
+  console.log("Using profile ID:", user.id); 
 
   try {
     const preparedData = processData(formData);
