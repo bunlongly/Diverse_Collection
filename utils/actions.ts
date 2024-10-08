@@ -146,15 +146,15 @@ function processData(formData: FormData): Product {
 
     if (!(value instanceof File)) {
       if (['colors', 'sizes', 'imageUrls'].includes(key)) {
-        // Check if rawData[key] already exists, make it an array if not
-        if (!rawData[key]) {
-          rawData[key] = [];
-        }
-        // Assuming values for arrays come as single strings that need to be split
-        rawData[key] = value.includes(',')
-          ? value.split(',').map(item => item.trim())
-          : [value.trim()];
-        console.log(`Processed array for ${key}:`, rawData[key]); // Log the processed array
+        if (!rawData[key]) rawData[key] = [];
+        const items = Array.isArray(value)
+          ? value
+          : value
+              .split(',')
+              .map(item => item.trim())
+              .filter(item => item !== '');
+        rawData[key] = items; // Set the processed array directly
+        console.log(`Processed array for ${key}:`, rawData[key]);
       } else if (
         ['price', 'originalPrice', 'sellingPrice', 'countInStock'].includes(key)
       ) {
@@ -173,7 +173,6 @@ function processData(formData: FormData): Product {
     brand: rawData.brand || '',
     genderCategory: rawData.genderCategory || 'UNISEX',
     category: rawData.category || 'Shoes',
-    condition: rawData.condition || 'New',
     description: rawData.description || '',
     price: rawData.price || null,
     inventoryStatus: rawData.inventoryStatus || 'In Stock',
@@ -184,7 +183,8 @@ function processData(formData: FormData): Product {
     colors: rawData.colors || [],
     imageUrls: rawData.imageUrls || [],
     releaseDate: rawData.releaseDate || null,
-    color: rawData.colors || []
+    condition: rawData.condition || 'New',
+    color: rawData.colors || [] // Ensure color is populated correctly as per the type expectation
   };
 }
 
@@ -209,8 +209,6 @@ export const createProductAction = async (
   if (!user) {
     throw new Error('You must be logged in to access this route');
   }
-
-  console.log("Using profile ID:", user.id); 
 
   try {
     const preparedData = processData(formData);
