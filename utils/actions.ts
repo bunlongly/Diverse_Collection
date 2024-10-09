@@ -145,7 +145,7 @@ function processData(formData: FormData): Product {
     console.log(`Key: ${key}, Value: ${value}`); // Log each key-value pair received
 
     if (!(value instanceof File)) {
-      if (['colors', 'sizes', 'imageUrls', 'color'].includes(key)) {
+      if (['colors', 'sizes', 'imageUrls'].includes(key)) {
         if (!rawData[key]) rawData[key] = [];
         // Handle comma-separated strings as well as single values
         const items = Array.isArray(value)

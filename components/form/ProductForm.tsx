@@ -21,9 +21,9 @@ interface ProductFormProps {
 }
 
 const ProductForm: React.FC<ProductFormProps> = ({ product, setProduct }) => {
-  const [productSizes, setProductSizes] = useState<string[]>(
-    product.sizes || []
-  );
+  // const [productSizes, setProductSizes] = useState<string[]>(
+  //   product.sizes || []
+  // );
 
   // Handle changes for inputs and textarea fields
   const handleInputChange = (
@@ -41,6 +41,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, setProduct }) => {
   // Handle changes for colors array
   const handleColorsChange = (colors: string[]) => {
     setProduct({ ...product, colors: colors });
+  };
+
+  const handleSizesChange = (sizes: string[]) => {
+    setProduct({ ...product, sizes: sizes });
   };
 
 
@@ -158,8 +162,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, setProduct }) => {
               onColorsChange={handleColorsChange}
             />
             <SizeForm
-              initialSizes={productSizes}
-              onSizesChange={setProductSizes}
+              initialSizes={product.sizes || []}
+              onSizesChange={handleSizesChange}
             />
           </div>
           <div>
