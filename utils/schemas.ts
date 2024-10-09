@@ -60,7 +60,7 @@ export const productSchema = z.object({
   inventoryStatus: z
     .string()
     .min(1, { message: 'Inventory status is required' }),
-  color: z.array(z.string()).optional(),
+  colors: z.array(z.string()).optional(),
   sizes: z.array(z.string()).optional(),
   imageUrls: z.array(z.string()).optional()
 });

@@ -33,7 +33,7 @@ model Product {
   originalPrice   Float?
   sellingPrice    Float
   inventoryStatus String
-  color           String[]
+  colors           String[]
   sizes           String[]  
   imageUrls       String[]
   releaseDate     DateTime?

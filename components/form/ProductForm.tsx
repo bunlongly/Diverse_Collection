@@ -40,7 +40,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, setProduct }) => {
 
   // Handle changes for colors array
   const handleColorsChange = (colors: string[]) => {
-    setProduct({ ...product, color: colors });
+    setProduct({ ...product, colors: colors });
   };
 
 
@@ -154,7 +154,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, setProduct }) => {
           </div>
           <div className='col-span-2'>
             <ColorForm
-              initialColors={product.color || []}
+              initialColors={product.colors || []}
               onColorsChange={handleColorsChange}
             />
             <SizeForm

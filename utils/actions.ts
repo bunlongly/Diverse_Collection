@@ -181,7 +181,7 @@ function processData(formData: FormData): Product {
     imageUrls: rawData.imageUrls || [],
     releaseDate: rawData.releaseDate || null,
     condition: rawData.condition || 'New',
-    color: rawData.color || []
+    // color: rawData.color || []
   };
 }
 

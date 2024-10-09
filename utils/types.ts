@@ -27,7 +27,6 @@ export interface Product {
   countInStock: number | null;
   releaseDate: number | null;
   condition: 'New' | 'Used' | 'Refurbished';
-  color: string[];
 }
 
 // Define more specific types for fields within each category
