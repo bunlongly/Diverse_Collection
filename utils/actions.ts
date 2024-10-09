@@ -158,6 +158,13 @@ function processData(formData: FormData): Product {
       ) {
         rawData[key] = value ? parseFloat(value) : null;
         console.log(`Processed number for ${key}:`, rawData[key]);
+      } else if (key === 'releaseDate' && value) {
+        // Convert releaseDate to an ISO string if it's not empty
+        const date = new Date(value.toString());
+        if (!isNaN(date.getTime())) {
+          rawData[key] = date.toISOString(); // Store date as ISO 8601 string
+          console.log(`Processed date for ${key}:`, rawData[key]);
+        }
       } else {
         rawData[key] = value;
       }
@@ -179,9 +186,8 @@ function processData(formData: FormData): Product {
     sizes: rawData.sizes || [],
     colors: rawData.colors || [],
     imageUrls: rawData.imageUrls || [],
-    releaseDate: rawData.releaseDate || null,
+    releaseDate: rawData.releaseDate || null, // Ensure releaseDate is in ISO format or null
     condition: rawData.condition || 'New',
-    // color: rawData.color || []
   };
 }
 

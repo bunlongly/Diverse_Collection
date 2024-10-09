@@ -25,7 +25,7 @@ export interface Product {
   originalPrice: number | null;
   sellingPrice: number | null;
   countInStock: number | null;
-  releaseDate: number | null;
+  releaseDate: Date | null; 
   condition: 'New' | 'Used' | 'Refurbished';
 }
 

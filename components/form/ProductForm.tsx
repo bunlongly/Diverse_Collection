@@ -1,4 +1,4 @@
-import React, { ChangeEvent} from 'react';
+import React, { ChangeEvent } from 'react';
 import { Product } from '@/utils/types'; // Ensure this is the correct path to your types
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,7 +13,6 @@ import {
 import ProductImage from './ProductImage';
 import ColorForm from './ColorForm';
 import SizeForm from './SizeForm';
-
 
 interface ProductFormProps {
   product: Product;
@@ -47,7 +46,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, setProduct }) => {
     setProduct({ ...product, sizes: sizes });
   };
 
-
+  const handleDateChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    const dateValue = value ? new Date(value).toISOString() : null;
+    setProduct({ ...product, [name]: dateValue });
+  };
+  
   return (
     <div className='flex p-6 bg-white dark:bg-card border border-gray-200 dark:border-input shadow-lg rounded-lg space-x-4'>
       <div className='flex-1 space-y-4 max-w-2xl'>
@@ -109,9 +113,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, setProduct }) => {
             </Label>
             <Select
               value={product.condition}
-              onValueChange={value =>
-                handleSelectChange('condition', value)
-              }
+              onValueChange={value => handleSelectChange('condition', value)}
             >
               <SelectTrigger className='border-gray-300 dark:border-input rounded shadow-md dark:bg-card dark:text-foreground'>
                 <SelectValue />
@@ -126,7 +128,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, setProduct }) => {
             </Select>
           </div>
 
-
           <div className='col-span-2'>
             <Label htmlFor='releaseDate' className='dark:text-foreground'>
               Release Date
@@ -135,13 +136,15 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, setProduct }) => {
               id='releaseDate'
               name='releaseDate'
               type='date'
-              value={product.releaseDate || ''}
-              onChange={handleInputChange}
+              value={
+                product.releaseDate
+                  ? product.releaseDate.toISOString().substring(0, 10)
+                  : ''
+              }
+              onChange={handleDateChange}
               className='mt-1 block w-full p-2 border-gray-300 dark:border-input rounded shadow-md dark:bg-card dark:text-foreground'
             />
           </div>
-
-          
 
           <div className='col-span-2'>
             <Label htmlFor='description' className='dark:text-foreground'>

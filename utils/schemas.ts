@@ -52,6 +52,22 @@ export const productSchema = z.object({
   category: z.string().min(1, { message: 'Category is required' }),
   description: z.string().optional(),
   condition: z.string().optional(),
+  releaseDate: z
+    .string()
+    .optional()
+    .refine(
+      dateStr => {
+        // Ensure the string is either undefined or a valid date format
+        if (dateStr) {
+          const date = new Date(dateStr);
+          return !isNaN(date.getTime());
+        }
+        return true;
+      },
+      {
+        message: 'Invalid date format, expected yyyy-mm-dd'
+      }
+    ),
   originalPrice: z
     .number()
     .nonnegative({ message: 'Original price must be a non-negative number' }),

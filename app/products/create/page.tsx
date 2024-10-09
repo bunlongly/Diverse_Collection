@@ -24,7 +24,7 @@ const CreateProduct: React.FC = () => {
     colors: [],
     imageUrls: [],
     condition: 'New',
-    releaseDate: null,
+    releaseDate: new Date("2024-10-09"),
   });
   const [selectedProductType, setSelectedProductType] =
     useState<ProductCategory>('Shoes');
