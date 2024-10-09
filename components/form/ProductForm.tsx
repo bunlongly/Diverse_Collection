@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from 'react';
+import React, { ChangeEvent} from 'react';
 import { Product } from '@/utils/types'; // Ensure this is the correct path to your types
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

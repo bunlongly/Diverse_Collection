@@ -51,6 +51,7 @@ export const productSchema = z.object({
   brand: z.string().min(1, { message: 'Brand is required' }),
   category: z.string().min(1, { message: 'Category is required' }),
   description: z.string().optional(),
+  condition: z.string().optional(),
   originalPrice: z
     .number()
     .nonnegative({ message: 'Original price must be a non-negative number' }),
