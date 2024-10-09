@@ -145,29 +145,26 @@ function processData(formData: FormData): Product {
     console.log(`Key: ${key}, Value: ${value}`); // Log each key-value pair received
 
     if (!(value instanceof File)) {
-      if (['colors', 'sizes', 'imageUrls'].includes(key)) {
+      if (['colors', 'sizes', 'imageUrls', 'color'].includes(key)) {
         if (!rawData[key]) rawData[key] = [];
+        // Handle comma-separated strings as well as single values
         const items = Array.isArray(value)
           ? value
-          : value
-              .split(',')
-              .map(item => item.trim())
-              .filter(item => item !== '');
-        rawData[key] = items; // Set the processed array directly
+          : value.split(',').map(item => item.trim());
+        rawData[key] = rawData[key].concat(items);
         console.log(`Processed array for ${key}:`, rawData[key]);
       } else if (
         ['price', 'originalPrice', 'sellingPrice', 'countInStock'].includes(key)
       ) {
-        // Convert string to number with fallback to null if conversion fails or if the string is empty
         rawData[key] = value ? parseFloat(value) : null;
-        console.log(`Processed number for ${key}:`, rawData[key]); // Log the processed number
+        console.log(`Processed number for ${key}:`, rawData[key]);
       } else {
         rawData[key] = value;
       }
     }
   });
 
-  console.log('Final processed data:', rawData); // Log the fully processed data object
+  console.log('Final processed data:', rawData);
   return {
     name: rawData.name || '',
     brand: rawData.brand || '',
@@ -184,7 +181,7 @@ function processData(formData: FormData): Product {
     imageUrls: rawData.imageUrls || [],
     releaseDate: rawData.releaseDate || null,
     condition: rawData.condition || 'New',
-    color: rawData.colors || [] // Ensure color is populated correctly as per the type expectation
+    color: rawData.color || []
   };
 }
 
