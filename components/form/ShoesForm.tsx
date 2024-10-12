@@ -1,7 +1,7 @@
 import React, { ChangeEvent } from 'react';
 import { Product, categoryFields } from '@/utils/types';
-import { Input } from '@/components/ui/input'; // Verify this path is correct
-import { Label } from '@/components/ui/label'; // Verify this path is correct
+import { Input } from '@/components/ui/input'; 
+import { Label } from '@/components/ui/label'; 
 
 interface ShoesFormProps {
   product: Product;

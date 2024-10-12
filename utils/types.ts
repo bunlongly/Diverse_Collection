@@ -68,6 +68,13 @@ export const categoryFields: CategoryFields = {
   ]
 };
 
+// Define a type for dynamic product attributes
+export type ProductAttribute = {
+  key: string;
+  value: string;
+};
+
+
 export interface IProductFormProps {
   product: Product;
   setProduct: React.Dispatch<React.SetStateAction<Product>>;

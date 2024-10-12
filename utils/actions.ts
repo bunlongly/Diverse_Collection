@@ -7,7 +7,7 @@ import { clerkClient, currentUser } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { validateWithZodSchema } from './schemas';
-import { Product } from './types';
+import { Product, ProductAttribute } from './types';
 
 const getAuthUser = async () => {
   const user = await currentUser();
@@ -138,58 +138,62 @@ export const updateProfileImageAction = async (
   }
 };
 
-function processData(formData: FormData): Product {
+function processData(formData: FormData): { baseData: Product, dynamicAttributes: ProductAttribute[] } {
   const rawData: any = {};
+  const dynamicAttributes: ProductAttribute[] = [];
+
+  // Define all known product fields that are not dynamic
+  const knownFields = ['name', 'brand', 'genderCategory', 'category', 'description', 'price', 
+                       'inventoryStatus', 'originalPrice', 'sellingPrice', 'countInStock',
+                       'sizes', 'colors', 'imageUrls', 'releaseDate', 'condition'];
 
   formData.forEach((value, key) => {
     console.log(`Key: ${key}, Value: ${value}`); // Log each key-value pair received
 
     if (!(value instanceof File)) {
-      if (['colors', 'sizes', 'imageUrls'].includes(key)) {
-        if (!rawData[key]) rawData[key] = [];
-        // Handle comma-separated strings as well as single values
-        const items = Array.isArray(value)
-          ? value
-          : value.split(',').map(item => item.trim());
-        rawData[key] = rawData[key].concat(items);
-        console.log(`Processed array for ${key}:`, rawData[key]);
-      } else if (
-        ['price', 'originalPrice', 'sellingPrice', 'countInStock'].includes(key)
-      ) {
-        rawData[key] = value ? parseFloat(value) : null;
-        console.log(`Processed number for ${key}:`, rawData[key]);
-      } else if (key === 'releaseDate' && value) {
-        // Convert releaseDate to an ISO string if it's not empty
-        const date = new Date(value.toString());
-        if (!isNaN(date.getTime())) {
-          rawData[key] = date.toISOString(); // Store date as ISO 8601 string
-          console.log(`Processed date for ${key}:`, rawData[key]);
+      if (knownFields.includes(key)) {
+        // Directly parse known fields based on their expected types
+        if (key === 'releaseDate' && value) {
+          rawData[key] = new Date(value.toString()).toISOString();
+        } else if (['price', 'originalPrice', 'sellingPrice', 'countInStock'].includes(key)) {
+          rawData[key] = parseFloat(value);
+        } else if (['sizes', 'colors', 'imageUrls'].includes(key)) {
+          if (!rawData[key]) rawData[key] = [];
+          rawData[key] = rawData[key].concat(value.toString().split(',').map(item => item.trim()));
+        } else {
+          rawData[key] = value.toString();
         }
       } else {
-        rawData[key] = value;
+        // Treat all other fields as dynamic attributes
+        dynamicAttributes.push({ key, value: value.toString() });
       }
     }
   });
 
   console.log('Final processed data:', rawData);
   return {
-    name: rawData.name || '',
-    brand: rawData.brand || '',
-    genderCategory: rawData.genderCategory || 'UNISEX',
-    category: rawData.category || 'Shoes',
-    description: rawData.description || '',
-    price: rawData.price || null,
-    inventoryStatus: rawData.inventoryStatus || 'In Stock',
-    originalPrice: rawData.originalPrice || null,
-    sellingPrice: rawData.sellingPrice || null,
-    countInStock: rawData.countInStock || null,
-    sizes: rawData.sizes || [],
-    colors: rawData.colors || [],
-    imageUrls: rawData.imageUrls || [],
-    releaseDate: rawData.releaseDate || null, // Ensure releaseDate is in ISO format or null
-    condition: rawData.condition || 'New'
+    baseData: {
+      name: rawData.name || '',
+      brand: rawData.brand || '',
+      genderCategory: rawData.genderCategory || 'UNISEX',
+      category: rawData.category || 'Shoes',
+      description: rawData.description || '',
+      price: rawData.price || null,
+      inventoryStatus: rawData.inventoryStatus || 'In Stock',
+      originalPrice: rawData.originalPrice || null,
+      sellingPrice: rawData.sellingPrice || null,
+      countInStock: rawData.countInStock || null,
+      sizes: rawData.sizes || [],
+      colors: rawData.colors || [],
+      imageUrls: rawData.imageUrls || [],
+      releaseDate: rawData.releaseDate || null,
+      condition: rawData.condition || 'New'
+    },
+    dynamicAttributes
   };
 }
+
+
 
 async function handleImageUpload(formData: FormData): Promise<string[]> {
   const imageUrls: string[] = [];
@@ -213,36 +217,36 @@ async function handleImageUpload(formData: FormData): Promise<string[]> {
 }
 
 
-// Main function to create a new product
-// Main function to create a new product
-export const createProductAction = async (
-  formData: FormData
-): Promise<{ message: string; product?: any }> => {
-  const user = await currentUser();
 
-  if (!user) {
-    throw new Error('You must be logged in to access this route');
-  }
+// Main function to create a new product
+export const createProductAction = async (formData: FormData): Promise<{ message: string; product?: any }> => {
+  const user = await currentUser();
+  if (!user) throw new Error('You must be logged in to access this route');
 
   try {
-    const preparedData = processData(formData);
-    console.log('Data to be validated:', preparedData); // Log the data right before validation
+    const { baseData, dynamicAttributes } = processData(formData);
 
-    // Handle image upload and integration into product data
+    // Handle image upload
     const imageUrls = await handleImageUpload(formData);
     if (imageUrls.length > 0) {
-      preparedData.imageUrls = imageUrls; // Assuming imageUrls should be an array of strings
-      console.log('Image URLs after upload:', imageUrls);
+      baseData.imageUrls = imageUrls;
     }
 
-    const validatedFields = validateWithZodSchema(productSchema, preparedData);
-    console.log('Validated fields:', validatedFields); // Log validated data to ensure correctness
+    // Validate base product data
+    const validatedData = validateWithZodSchema(productSchema, baseData);
+    console.log(validatedData)
 
-    // Create new product in the database
+    // Create the product with dynamic attributes in the database
     const newProduct = await db.product.create({
       data: {
-        ...validatedFields,
-        profileId: user.id
+        ...validatedData,
+        profileId: user.id,
+        attributes: {
+          create: dynamicAttributes
+        }
+      },
+      include: {
+        attributes: true // Include attributes in the returned product
       }
     });
 
@@ -253,8 +257,7 @@ export const createProductAction = async (
   } catch (error) {
     console.error('Failed in createProductAction:', error);
     return {
-      message:
-        error instanceof Error ? error.message : 'Failed to create product'
+      message: error instanceof Error ? error.message : 'Failed to create product'
     };
   }
 };
