@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent, useCallback } from 'react';
 
 type ImagePreviewProps = {
   src: string;
@@ -17,46 +17,64 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({ src, onRemove }) => (
   </div>
 );
 
-const ProductImage: React.FC = () => {
+interface ProductImageProps {
+  images: string[];
+  setImages: (images: string[]) => void;
+}
+
+const ProductImage: React.FC<ProductImageProps> = ({ images, setImages }) => {
   const [mainImage, setMainImage] = useState<string>('');
-  const [images, setImages] = useState<string[]>([]);
 
-  const handleImageChange = (
-    event: ChangeEvent<HTMLInputElement>,
-    isMain: boolean = false
-  ) => {
-    const files = event.target.files;
-    if (files && files[0]) {
-      const fileReader = new FileReader();
-      fileReader.onload = e => {
-        const { result } = e.target!;
-        if (isMain) {
-          setMainImage(result as string);
-        } else {
-          setImages(prevImages => [...prevImages, result as string]);
-        }
-      };
-      fileReader.readAsDataURL(files[0]);
-    }
-  };
+  const handleImageChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>, isMain: boolean = false) => {
+      const files = event.target.files;
+      if (files) {
+        Array.from(files).forEach(file => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const result = reader.result as string;
+            if (isMain) {
+              setMainImage(result);
+              setImages([result, ...images]);
+            } else {
+              const updatedImages = [...images, result];
+              setImages(updatedImages);
+            }
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+    },
+    [images, setImages]
+  );
 
-  const removeImage = (index: number) => {
-    setImages(prevImages => prevImages.filter((_, i) => i !== index));
-  };
+  const removeImage = useCallback(
+    (index: number) => {
+      const newImages = images.filter((_, i) => i !== index);
+      setImages(newImages);
+    },
+    [images, setImages]
+  );
+
+  const clearAllImages = useCallback(() => {
+    setMainImage('');
+    setImages([]);
+  }, [setImages]);
 
   return (
     <div className='p-4 bg-white dark:bg-card shadow-lg rounded-lg'>
       <h1 className='text-lg text-center p-6 dark:text-foreground'>
-        Product Image
+        Product Images
       </h1>
       <div className='grid grid-cols-3 gap-4'>
         <div className='col-span-2'>
           <div className='mb-4'>
             <label className='block text-sm font-medium text-gray-700 dark:text-foreground'>
-              Product Main Image
+              Main Image
             </label>
             <input
               type='file'
+              accept='image/*'
               onChange={e => handleImageChange(e, true)}
               className='mt-1 w-full'
             />
@@ -65,7 +83,7 @@ const ProductImage: React.FC = () => {
                 <img
                   src={mainImage}
                   alt='Main Product'
-                 className='w-full h-auto min-h-full object-cover rounded-md'
+                  className='w-full h-auto min-h-full object-cover rounded-md'
                 />
               </div>
             )}
@@ -76,7 +94,8 @@ const ProductImage: React.FC = () => {
             </label>
             <input
               type='file'
-              onChange={handleImageChange}
+              accept='image/*'
+              onChange={e => handleImageChange(e, false)}
               multiple
               className='mt-1 w-full'
             />
@@ -90,8 +109,15 @@ const ProductImage: React.FC = () => {
               ))}
             </div>
           </div>
+          <button
+            onClick={clearAllImages}
+            className='mt-4 bg-red-500 text-white py-2 px-4 rounded'
+            type="button" 
+          >
+            Clear All Images
+          </button>
         </div>
-        <div>
+        <div className='col-span-1'>
           <p className='text-sm font-medium text-gray-700 dark:text-foreground mb-2'>
             Uploaded Images Preview
           </p>

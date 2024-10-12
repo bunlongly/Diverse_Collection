@@ -15,12 +15,12 @@ const CreateProduct: React.FC = () => {
     category: 'Shoes',
     description:
       'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
-    price: null, // Initialize as null
+    price: 12, // Initialize as null
     inventoryStatus: 'In Stock',
-    originalPrice: null, // Initialize as null
-    sellingPrice: null, // Initialize as null
-    countInStock: null, // Initialize as null
-    sizes: [],
+    originalPrice: 32, // Initialize as null
+    sellingPrice: 23, // Initialize as null
+    countInStock: 43, // Initialize as null
+    sizes: ['M', '24'],
     colors: [],
     imageUrls: [],
     condition: 'New',

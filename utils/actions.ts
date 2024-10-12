@@ -187,22 +187,33 @@ function processData(formData: FormData): Product {
     colors: rawData.colors || [],
     imageUrls: rawData.imageUrls || [],
     releaseDate: rawData.releaseDate || null, // Ensure releaseDate is in ISO format or null
-    condition: rawData.condition || 'New',
+    condition: rawData.condition || 'New'
   };
 }
 
-// Helper function to handle image uploads
-async function handleImageUpload(formData: FormData): Promise<string> {
-  const imageFile = formData.get('image');
-  if (imageFile instanceof File) {
-    const newFormData = new FormData();
-    newFormData.append('image', imageFile);
-    const uploadResult = await upload(null, newFormData);
-    return uploadResult || ''; // Return the URL or an empty string if the upload fails
-  }
-  return '';
+async function handleImageUpload(formData: FormData): Promise<string[]> {
+  const imageUrls: string[] = [];
+
+  formData.forEach(async (value, key) => {
+    if (value instanceof File && key === 'image') {
+      const newFormData = new FormData();
+      newFormData.append('image', value);
+      try {
+        const uploadResult = await upload(null, newFormData); // Assuming 'upload' returns a promise
+        if (uploadResult) {
+          imageUrls.push(uploadResult);
+        }
+      } catch (error) {
+        console.error('Upload failed for image:', error);
+      }
+    }
+  });
+
+  return imageUrls; // This will be an array of URLs or empty if uploads fail
 }
 
+
+// Main function to create a new product
 // Main function to create a new product
 export const createProductAction = async (
   formData: FormData
@@ -216,16 +227,21 @@ export const createProductAction = async (
   try {
     const preparedData = processData(formData);
     console.log('Data to be validated:', preparedData); // Log the data right before validation
+
+    // Handle image upload and integration into product data
+    const imageUrls = await handleImageUpload(formData);
+    if (imageUrls.length > 0) {
+      preparedData.imageUrls = imageUrls; // Assuming imageUrls should be an array of strings
+      console.log('Image URLs after upload:', imageUrls);
+    }
+
     const validatedFields = validateWithZodSchema(productSchema, preparedData);
     console.log('Validated fields:', validatedFields); // Log validated data to ensure correctness
-
-    const imagePath = await handleImageUpload(formData);
 
     // Create new product in the database
     const newProduct = await db.product.create({
       data: {
         ...validatedFields,
-        imageUrls: imagePath ? [imagePath] : [],
         profileId: user.id
       }
     });

@@ -1,4 +1,4 @@
-import React, { ChangeEvent } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import { Product } from '@/utils/types'; // Ensure this is the correct path to your types
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,9 +20,13 @@ interface ProductFormProps {
 }
 
 const ProductForm: React.FC<ProductFormProps> = ({ product, setProduct }) => {
-  // const [productSizes, setProductSizes] = useState<string[]>(
-  //   product.sizes || []
-  // );
+  const [images, setImages] = useState<string[]>(product.imageUrls || []);
+ 
+
+  const handleImageChange = (newImages: string[]) => {
+    setImages(newImages);
+    setProduct({ ...product, imageUrls: newImages });
+  };
 
   // Handle changes for inputs and textarea fields
   const handleInputChange = (
@@ -45,6 +49,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, setProduct }) => {
   const handleSizesChange = (sizes: string[]) => {
     setProduct({ ...product, sizes: sizes });
   };
+
+
 
   const handleDateChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -224,7 +230,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, setProduct }) => {
         </div>
       </div>
       <div className='pl-8 w-1/2'>
-        <ProductImage />
+      <ProductImage setImages={handleImageChange} images={images} />
+
       </div>
     </div>
   );
