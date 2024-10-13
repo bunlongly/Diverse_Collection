@@ -52,8 +52,13 @@ const ProductImage: React.FC<ProductImageProps> = ({ images, setImages }) => {
     (index: number) => {
       const newImages = images.filter((_, i) => i !== index);
       setImages(newImages);
+      if (mainImage && index === 0 && newImages.length) {
+        setMainImage(newImages[0]);
+      } else if (images[index] === mainImage) {
+        setMainImage('');
+      }
     },
-    [images, setImages]
+    [images, setImages, mainImage]
   );
 
   const clearAllImages = useCallback(() => {
@@ -109,13 +114,15 @@ const ProductImage: React.FC<ProductImageProps> = ({ images, setImages }) => {
               ))}
             </div>
           </div>
-          <button
-            onClick={clearAllImages}
-            className='mt-4 bg-red-500 text-white py-2 px-4 rounded'
-            type="button" 
-          >
-            Clear All Images
-          </button>
+          {(mainImage || images.length > 0) && (
+            <button
+              onClick={clearAllImages}
+              className='mt-4 bg-red-500 text-white py-2 px-4 rounded'
+              type='button'
+            >
+              Clear All Images
+            </button>
+          )}
         </div>
         <div className='col-span-1'>
           <p className='text-sm font-medium text-gray-700 dark:text-foreground mb-2'>
