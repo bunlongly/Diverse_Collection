@@ -24,7 +24,7 @@ const CreateProduct: React.FC = () => {
     colors: [],
     imageUrls: [],
     condition: 'New',
-    releaseDate: new Date("2024-10-09"),
+    releaseDate: new Date('2024-10-09')
   });
   const [selectedProductType, setSelectedProductType] =
     useState<ProductCategory>('Shoes');
@@ -104,10 +104,7 @@ const CreateProduct: React.FC = () => {
           <ProductDefault product={product} setProduct={setProduct} />
           <SpecificProductForm product={product} setProduct={setProduct} />
         </Suspense>
-        <SubmitButton
-          text='Create Product'
-          className='mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
-        />
+        <SubmitButton text='Create Product' className='mt-4' />
       </form>
     </div>
   );
