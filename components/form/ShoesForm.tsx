@@ -1,7 +1,7 @@
 import React, { ChangeEvent } from 'react';
 import { Product, categoryFields } from '@/utils/types';
-import { Input } from '@/components/ui/input'; 
-import { Label } from '@/components/ui/label'; 
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface ShoesFormProps {
   product: Product;
@@ -28,8 +28,12 @@ const Shoes: React.FC<ShoesFormProps> = ({ product, setProduct }) => {
     const fields = categoryFields['Shoes'];
 
     return fields.map(field => (
-      <div className='mb-6' key={field.label}>
-        <Label htmlFor={field.label} className='dark:text-foreground'>
+      <div className=' w-full' key={field.label}>
+        {' '}
+        <Label
+          htmlFor={field.label}
+          className='block text-sm font-medium text-gray-700 dark:text-foreground'
+        >
           {field.label + (field.type === 'array' ? ' (comma-separated)' : '')}
         </Label>
         <Input
@@ -58,7 +62,9 @@ const Shoes: React.FC<ShoesFormProps> = ({ product, setProduct }) => {
   };
 
   return (
-    <div className='p-6 bg-white dark:bg-card shadow-md rounded-lg'>
+    <div className='flex flex-col p-6 pb-11 bg-white dark:bg-card border border-gray-200 dark:border-input shadow-lg rounded-lg space-y-4'>
+      {' '}
+      {/* Use space-y for vertical spacing */}
       <h2 className='text-lg font-semibold mb-6 dark:text-foreground'>
         Customize Shoe Attributes
       </h2>

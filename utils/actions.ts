@@ -213,7 +213,7 @@ async function handleImageUpload(formData: FormData): Promise<string[]> {
     }
   });
 
-  return imageUrls; // This will be an array of URLs or empty if uploads fail
+  return imageUrls; 
 }
 
 
