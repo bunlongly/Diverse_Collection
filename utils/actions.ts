@@ -138,28 +138,57 @@ export const updateProfileImageAction = async (
   }
 };
 
-function processData(formData: FormData): { baseData: Product, dynamicAttributes: ProductAttribute[] } {
+function processData(
+  formData: FormData,
+  uploadedImageUrls: string[] = []
+): {
+  baseData: Product;
+  dynamicAttributes: ProductAttribute[];
+} {
   const rawData: any = {};
   const dynamicAttributes: ProductAttribute[] = [];
 
   // Define all known product fields that are not dynamic
-  const knownFields = ['name', 'brand', 'genderCategory', 'category', 'description', 'price', 
-                       'inventoryStatus', 'originalPrice', 'sellingPrice', 'countInStock',
-                       'sizes', 'colors', 'imageUrls', 'releaseDate', 'condition'];
+  const knownFields = [
+    'name',
+    'brand',
+    'genderCategory',
+    'category',
+    'description',
+    'price',
+    'inventoryStatus',
+    'originalPrice',
+    'sellingPrice',
+    'countInStock',
+    'sizes',
+    'colors',
+    'releaseDate',
+    'condition'
+  ];
 
   formData.forEach((value, key) => {
     console.log(`Key: ${key}, Value: ${value}`); // Log each key-value pair received
 
     if (!(value instanceof File)) {
+      // Exclude file data from processing here
       if (knownFields.includes(key)) {
         // Directly parse known fields based on their expected types
         if (key === 'releaseDate' && value) {
           rawData[key] = new Date(value.toString()).toISOString();
-        } else if (['price', 'originalPrice', 'sellingPrice', 'countInStock'].includes(key)) {
+        } else if (
+          ['price', 'originalPrice', 'sellingPrice', 'countInStock'].includes(
+            key
+          )
+        ) {
           rawData[key] = parseFloat(value);
-        } else if (['sizes', 'colors', 'imageUrls'].includes(key)) {
+        } else if (['sizes', 'colors'].includes(key)) {
           if (!rawData[key]) rawData[key] = [];
-          rawData[key] = rawData[key].concat(value.toString().split(',').map(item => item.trim()));
+          rawData[key] = rawData[key].concat(
+            value
+              .toString()
+              .split(',')
+              .map(item => item.trim())
+          );
         } else {
           rawData[key] = value.toString();
         }
@@ -169,6 +198,9 @@ function processData(formData: FormData): { baseData: Product, dynamicAttributes
       }
     }
   });
+
+  // Directly set the image URLs obtained from the upload process
+  rawData['imageUrls'] = uploadedImageUrls;
 
   console.log('Final processed data:', rawData);
   return {
@@ -185,7 +217,7 @@ function processData(formData: FormData): { baseData: Product, dynamicAttributes
       countInStock: rawData.countInStock || null,
       sizes: rawData.sizes || [],
       colors: rawData.colors || [],
-      imageUrls: rawData.imageUrls || [],
+      imageUrls: rawData.imageUrls, // Ensure this is set to the actual URLs
       releaseDate: rawData.releaseDate || null,
       condition: rawData.condition || 'New'
     },
@@ -193,50 +225,43 @@ function processData(formData: FormData): { baseData: Product, dynamicAttributes
   };
 }
 
-
-
 async function handleImageUpload(formData: FormData): Promise<string[]> {
   const imageUrls: string[] = [];
+  const file = formData.get('image');
 
-  formData.forEach(async (value, key) => {
-    if (value instanceof File && key === 'image') {
-      const newFormData = new FormData();
-      newFormData.append('image', value);
-      try {
-        const uploadResult = await upload(null, newFormData); // Assuming 'upload' returns a promise
-        if (uploadResult) {
-          imageUrls.push(uploadResult);
-        }
-      } catch (error) {
-        console.error('Upload failed for image:', error);
+  if (file instanceof File) {
+    const newFormData = new FormData();
+    newFormData.append('image', file);
+
+    try {
+      const uploadedImageUrl = await upload(undefined, newFormData);
+      if (uploadedImageUrl) {
+        imageUrls.push(uploadedImageUrl);
       }
+    } catch (error) {
+      console.error('Upload failed for image:', error);
     }
-  });
+  } else {
+    console.error('No file was found in FormData under the key "image".');
+  }
 
-  return imageUrls; 
+  return imageUrls;
 }
 
-
-
 // Main function to create a new product
-export const createProductAction = async (formData: FormData): Promise<{ message: string; product?: any }> => {
+export const createProductAction = async (
+  formData: FormData
+): Promise<{ message: string; product?: any }> => {
   const user = await currentUser();
   if (!user) throw new Error('You must be logged in to access this route');
 
+  const imageUrls = await handleImageUpload(formData);
+  const { baseData, dynamicAttributes } = processData(formData, imageUrls);
+
   try {
-    const { baseData, dynamicAttributes } = processData(formData);
-
-    // Handle image upload
-    const imageUrls = await handleImageUpload(formData);
-    if (imageUrls.length > 0) {
-      baseData.imageUrls = imageUrls;
-    }
-
-    // Validate base product data
     const validatedData = validateWithZodSchema(productSchema, baseData);
-    console.log(validatedData)
+    console.log('Data to be Validate : ', validatedData);
 
-    // Create the product with dynamic attributes in the database
     const newProduct = await db.product.create({
       data: {
         ...validatedData,
@@ -246,7 +271,7 @@ export const createProductAction = async (formData: FormData): Promise<{ message
         }
       },
       include: {
-        attributes: true // Include attributes in the returned product
+        attributes: true
       }
     });
 
@@ -257,7 +282,8 @@ export const createProductAction = async (formData: FormData): Promise<{ message
   } catch (error) {
     console.error('Failed in createProductAction:', error);
     return {
-      message: error instanceof Error ? error.message : 'Failed to create product'
+      message:
+        error instanceof Error ? error.message : 'Failed to create product'
     };
   }
 };
